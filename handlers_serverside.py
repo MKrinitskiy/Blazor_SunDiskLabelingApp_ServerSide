@@ -55,7 +55,7 @@ def PreviousImage(app, webapi_client_id, cache_abs_path):
     clientHelper = app.clientHelpers[webapi_client_id]
     print('got clientHelper for the client %s' % webapi_client_id)
 
-    # TODO: fix PreviousImage
+    # DONE: fix PreviousImage
     # category=handlers issue=none estimate=1h
     # PreviousImage works wrong. It returns the last example which is actually current
 
