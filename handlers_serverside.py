@@ -50,11 +50,16 @@ def PreviousImage(app, webapi_client_id, cache_abs_path):
     # The mechanics should involve storing all the images that was already processed
     # and PreviousImage() should return them in reversed order
 
+    # TODO: fix PreviousImage
+    # category=handlers issue=none estimate=30m
+    # PreviousImage works wrong. It returns the last example which is actually current
+
     print('entered PreviousImage()')
 
     clientHelper = app.clientHelpers[webapi_client_id]
     print('got clientHelper for the client %s' % webapi_client_id)
 
+    tmp_fname = clientHelper.generated_examples_history.pop()
     tmp_fname = clientHelper.generated_examples_history.pop()
     print('tmp_fname = %s' % tmp_fname)
 
