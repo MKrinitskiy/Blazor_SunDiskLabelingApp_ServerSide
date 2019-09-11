@@ -129,3 +129,5 @@ dmypy.json
 cache/
 cache/*
 tmp/
+
+tdg.log
