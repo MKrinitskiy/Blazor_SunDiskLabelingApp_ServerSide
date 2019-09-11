@@ -51,7 +51,7 @@ def PreviousImage(app, webapi_client_id, cache_abs_path):
     # and PreviousImage() should return them in reversed order
 
     # TODO: fix PreviousImage
-    # category=handlers issue=none estimate=30m
+    # category=handlers issue=none estimate=1h
     # PreviousImage works wrong. It returns the last example which is actually current
 
     print('entered PreviousImage()')
