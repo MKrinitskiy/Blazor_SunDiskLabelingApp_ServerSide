@@ -20,6 +20,9 @@ def MakeImageDataHelper(app, webapi_client_id = ''):
 
 
 def NextImage(app, webapi_client_id, cache_abs_path):
+    # TODO: store the images IDs for the PreviousImage() to work properly
+    # category=general functionality issue=none estimate=2h
+
     clientHelper = app.clientHelpers[webapi_client_id]
     clientHelper.read_next_image()
     tmp_base_fname = 'plot-%s.jpg' % binascii.hexlify(os.urandom(5)).decode('ascii')
@@ -39,3 +42,11 @@ def NextImage(app, webapi_client_id, cache_abs_path):
     print('JSON: ' + response.ToJSON())
     return response.ToJSON()
 
+
+
+def PreviousImage(app, webapi_client_id, cache_abs_path):
+    # TODO: Implement PreviousImage(app, webapi_client_id, cache_abs_path)
+    # category=handlers issue=none estimate=2h
+    # The mechanics should involve storing all the images that was already processed
+    # and PreviousImage() should return them in reversed order
+    return ""

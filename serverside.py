@@ -78,8 +78,8 @@ def image():
                         mimetype='application/json')
 
     if command == 'get_previous_image':
-        return Response(NextImage(app,
-                                  webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
+        return Response(PreviousImage(app,
+                                      webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
                         mimetype='application/json')
 
     elif command == 'get_the_image':
