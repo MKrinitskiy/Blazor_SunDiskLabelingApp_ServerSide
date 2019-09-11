@@ -20,14 +20,14 @@ def MakeImageDataHelper(app, webapi_client_id = ''):
 
 
 def NextImage(app, webapi_client_id, cache_abs_path):
-    # TODO: store the images IDs for the PreviousImage() to work properly
+    # DONE: store the images IDs for the PreviousImage() to work properly
     # category=general functionality issue=none estimate=2h
 
     clientHelper = app.clientHelpers[webapi_client_id]
-    clientHelper.read_next_image()
     tmp_base_fname = 'plot-%s.jpg' % binascii.hexlify(os.urandom(5)).decode('ascii')
     tmp_fname = os.path.join(cache_abs_path, tmp_base_fname)
-    cv2.imwrite(tmp_fname, clientHelper.currentImageBinary)
+    clientHelper.read_next_image(tmp_image_fname=tmp_fname)
+
     img_uri = urljoin('cache', tmp_base_fname)
 
     response = WebAPI_response(response_code=ResponseCodes.OK,

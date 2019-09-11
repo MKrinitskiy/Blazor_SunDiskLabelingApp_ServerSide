@@ -7,6 +7,7 @@ import io, cv2, pickle, uuid, threading, os, sys
 import pandas as pd
 from libs import *
 from .batches_generator import batches_generator
+# from queue import Queue
 
 
 class AllSkyImagesDataAPI(object):
@@ -23,6 +24,8 @@ class AllSkyImagesDataAPI(object):
 
         self.currentImageBinary = None
 
+        self.generated_examples_history = []
+
 
     def shuffle_files(self):
         self.indices = np.random.permutation(self.indices)
@@ -32,11 +35,17 @@ class AllSkyImagesDataAPI(object):
             self.shuffle_files()
         self.indices_batch_generator = batches_generator(self.indices, batch_size=1, loop=False)
 
-    def read_next_image(self):
+    def read_next_image(self, tmp_image_fname):
         img_fname_idx = next(self.indices_batch_generator)[0]
         img_fname = self.fnames[img_fname_idx]
+
         image = cv2.imread(img_fname)
 
-        # maybe some processing
+        #
+        # probably, some preprocessing here
+        #
 
         self.currentImageBinary = image
+
+        cv2.imwrite(tmp_image_fname, self.currentImageBinary)
+        self.generated_examples_history.append(tmp_image_fname)
