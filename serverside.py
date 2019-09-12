@@ -126,7 +126,14 @@ def labels():
 
     command = request.args['command']
     if command == 'current_example_labels':
-        pass
+        # TODO: implement the command current_example_labels of the labels route
+        # category=functionality issue=none estimate=3h
+
+        data_received = request.data
+        print("received data:")
+        print(data_received)
+        response = app.response_class(response="", status=200, mimetype='text/plain')
+        return response
 
 
 
