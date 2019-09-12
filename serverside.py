@@ -95,6 +95,10 @@ def image():
 
 
 
+# TODO: create route for receiving labeling info from client
+# category=route issue=none estimate=1h
+# This is just the beginning. All the mechanics will be implemented later
+
 
 
 
