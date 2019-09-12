@@ -95,9 +95,43 @@ def image():
 
 
 
-# TODO: create route for receiving labeling info from client
+
+
+
+
+# DONE: create route for receiving labeling info from client
 # category=route issue=none estimate=1h
 # This is just the beginning. All the mechanics will be implemented later
+@app.route('/labels', methods=['POST'])
+def labels():
+    try:
+        webapi_client_id = request.args['webapi_client_id']
+    except Exception as ex:
+        print(ex)
+        ReportException('./logs/app.log', ex)
+        response = WebAPI_response(response_code=ResponseCodes.Error,
+                                   error=WebAPI_error(error_code=ErrorCodes.GenericError,
+                                                      error_description='webapi_client_id not presented'),
+                                   response_description='could not execute the command')
+        return response
+
+    if webapi_client_id not in app.clientHelpers.keys():
+        ex = Exception("presented client webapi ID not found in the list of started IDs")
+        ReportException('./logs/app.log', ex)
+        response = WebAPI_response(response_code=ResponseCodes.Error,
+                                   error=WebAPI_error(error_code=ErrorCodes.ClientIDnotFound,
+                                                      error_description='presented client webapi ID not found in the list of started IDs'),
+                                   response_description='unable to get an image for a client without a session')
+        return response
+
+    command = request.args['command']
+    if command == 'current_example_labels':
+        pass
+
+
+
+
+
 
 
 
@@ -128,4 +162,4 @@ def imdone():
         return response
 
 
-app.run(host='127.0.0.1',port=2019)
+app.run(host='0.0.0.0', port=2019)
