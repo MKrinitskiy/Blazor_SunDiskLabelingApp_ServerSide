@@ -102,7 +102,7 @@ def image():
 # DONE: create route for receiving labeling info from client
 # category=route issue=none estimate=1h
 # This is just the beginning. All the mechanics will be implemented later
-@app.route('/labels', methods=['POST'])
+@app.route('/labels', methods=['GET', 'POST'])
 def labels():
     try:
         webapi_client_id = request.args['webapi_client_id']
@@ -125,16 +125,27 @@ def labels():
         return response
 
     command = request.args['command']
-    if command == 'current_example_labels':
-        # TODO: implement the command current_example_labels of the labels route
-        # category=functionality issue=none estimate=3h
+    if request.method == 'POST':
+        if command == 'post_current_example_labels':
+            # TODO: implement the command post_current_example_labels of the labels route
+            # category=functionality issue=none estimate=6h
 
-        data_received = request.data
-        print("received data:")
-        print(data_received)
-        response = app.response_class(response="", status=200, mimetype='text/plain')
-        return response
-
+            data_received = request.data
+            print("received data:")
+            print(data_received)
+            response = app.response_class(response="", status=200, mimetype='text/plain')
+            return response
+    elif request.method == 'GET':
+        if command == 'get_current_example_labels':
+            # TODO: implement the command get_current_example_labels of the labels route
+            # category=functionality issue=none estimate=6h
+            # return Response(NextImage(app,
+            #                           webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
+            #                 mimetype='application/json')
+            response = WebAPI_response(response_code=ResponseCodes.Error,
+                                       error=WebAPI_error(error_code=ErrorCodes.GenericError,
+                                                          error_description='webapi_client_id not presented'),
+                                       response_description='could not execute the command')
 
 
 
