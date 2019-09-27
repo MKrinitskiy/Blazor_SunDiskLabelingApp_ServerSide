@@ -29,6 +29,12 @@ def main():
 
 
 
+# TODO: WebAPI_response cannot be sent to client. So a routing function should not return WebAPI_response but Response((WebAPI_response response).ToJSON())
+# category=bug estimate=1h
+
+
+
+
 @app.route('/exec', methods=['GET'])
 def exec():
     command = request.args['command']
@@ -42,7 +48,8 @@ def exec():
                                        error=WebAPI_error(error_code=ErrorCodes.GenericError,
                                                           error_description='webapi_client_id not presented'),
                                        response_description='could not execute the command')
-            return response
+
+            return Response(response.ToJSON(), mimetype='application/json')
 
         return Response(MakeImageDataHelper(app, webapi_client_id=webapi_client_id), mimetype='application/json')
 
@@ -58,7 +65,7 @@ def image():
                                    error=WebAPI_error(error_code=ErrorCodes.GenericError,
                                                       error_description='webapi_client_id not presented'),
                                    response_description='could not execute the command')
-        return response
+        return Response(response.ToJSON(), mimetype='application/json')
 
     if webapi_client_id not in app.clientHelpers.keys():
         ex = Exception("presented client webapi ID not found in the list of started IDs")
@@ -113,7 +120,7 @@ def labels():
                                    error=WebAPI_error(error_code=ErrorCodes.GenericError,
                                                       error_description='webapi_client_id not presented'),
                                    response_description='could not execute the command')
-        return response
+        return Response(response.ToJSON(), mimetype='application/json')
 
     if webapi_client_id not in app.clientHelpers.keys():
         ex = Exception("presented client webapi ID not found in the list of started IDs")
@@ -122,7 +129,7 @@ def labels():
                                    error=WebAPI_error(error_code=ErrorCodes.ClientIDnotFound,
                                                       error_description='presented client webapi ID not found in the list of started IDs'),
                                    response_description='unable to get an image for a client without a session')
-        return response
+        return Response(response.ToJSON(), mimetype='application/json')
 
     command = request.args['command']
     if request.method == 'POST':
@@ -137,15 +144,16 @@ def labels():
             return response
     elif request.method == 'GET':
         if command == 'get_current_example_labels':
-            # TODO: implement the command get_current_example_labels of the labels route
+            # TODO: implement the c ommand get_current_example_labels of the labels route
             # category=functionality issue=none estimate=6h
             # return Response(NextImage(app,
             #                           webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
             #                 mimetype='application/json')
             response = WebAPI_response(response_code=ResponseCodes.Error,
-                                       error=WebAPI_error(error_code=ErrorCodes.GenericError,
-                                                          error_description='webapi_client_id not presented'),
+                                       error=WebAPI_error(error_code = ErrorCodes.NotImplementedError,
+                                                          error_description='sorry, the command ' + command + ' is not implemented at serverside'),
                                        response_description='could not execute the command')
+            return Response(response.ToJSON(), mimetype='application/json')
 
 
 
