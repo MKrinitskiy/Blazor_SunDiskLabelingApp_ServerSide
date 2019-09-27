@@ -29,7 +29,7 @@ def main():
 
 
 
-# TODO: WebAPI_response cannot be sent to client. So a routing function should not return WebAPI_response but Response((WebAPI_response response).ToJSON())
+# DONE: WebAPI_response cannot be sent to client. So a routing function should not return WebAPI_response but Response((WebAPI_response response).ToJSON())
 # category=bug estimate=1h
 
 
