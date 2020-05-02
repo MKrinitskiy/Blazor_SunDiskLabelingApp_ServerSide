@@ -1,191 +1,40 @@
-import os, sys
-python_path = sys.executable
-if sys.platform == 'win32':
-    os.environ['PROJ_LIB'] = os.path.join(os.path.split(python_path)[0], 'Library', 'share')
-elif ((sys.platform == 'linux') | (sys.platform == 'darwin')):
-    os.environ['PROJ_LIB'] = os.path.join(sys.executable.replace('bin/python', ''), 'share', 'proj')
-
-sys.path.append('./libs')
-
-from flask import request, make_response, Response
 from flask_cors import CORS
-from handlers_serverside import *
+from libs import *
 import binascii, logging
-import cv2
-
-app = FlaskExtended(__name__, static_folder='cache')
-CORS(app)
-app.config['SECRET_KEY'] = binascii.hexlify(os.urandom(24))
-file_handler = logging.FileHandler('./logs/app.log')
-
-tmp_imag_dir = os.path.join(os.getcwd(), 'tmp')
-src_data_dir = os.path.join(os.getcwd(), 'src_data')
-
-@app.route('/')
-def main():
-    response = make_response('Nothing to do here')
-    response.headers['ErrorDesc'] = 'CommandNotUnderstood'
-    return response
+from url_rules import *
+from flask import g
 
 
+if __name__ == "__main__":
+    # execute only if run as a script
 
-# DONE: WebAPI_response cannot be sent to client. So a routing function should not return WebAPI_response but Response((WebAPI_response response).ToJSON())
-# category=bug estimate=1h
+    settings = Settings(os.path.dirname(os.path.abspath(__file__)))
+    settings.load()
+    if settings.get(SETTING_TRACKS_DATABASE_FNAME) is None:
+        db_fname = './db/tracks.db'
+        if DatabaseOps.create_tracks_db(db_fname, './logs/errors.log'):
+            settings[SETTING_TRACKS_DATABASE_FNAME] = db_fname
+            settings.save()
+        else:
+            raise Exception("unable to create tracks database. Cannot proceed.")
 
+    app = FlaskExtended(__name__, static_folder='cache')
+    CORS(app)
+    app.config['SECRET_KEY'] = binascii.hexlify(os.urandom(24))
+    # file_handler = logging.FileHandler('./logs/app.log')
 
+    tmp_imag_dir = os.path.join(os.getcwd(), 'tmp')
+    src_data_dir = os.path.join(os.getcwd(), 'src_data')
 
+    app.add_url_rule(rule='/', endpoint='url_rule_root', view_func=lambda: url_rule_root(app), methods=['GET'])
+    app.add_url_rule(rule='/exec', endpoint='url_rule_exec', view_func=lambda: url_rule_exec(app), methods=['GET'])
+    app.add_url_rule(rule='/images', endpoint='url_rule_image', view_func=lambda: url_rule_image(app), methods=['GET'])
+    app.add_url_rule(rule='/labels', endpoint='url_rule_labels', view_func=lambda: url_rule_labels(app), methods=['GET', 'POST'])
+    app.add_url_rule(rule='/imdone', endpoint='url_rule_imdone', view_func=lambda: url_rule_imdone(app), methods=['GET'])
 
-@app.route('/exec', methods=['GET'])
-def exec():
-    command = request.args['command']
-    if command == 'start':
-        try:
-            webapi_client_id = request.args['webapi_client_id']
-        except Exception as ex:
-            print(ex)
-            ReportException('./logs/app.log', ex)
-            response = WebAPI_response(response_code=ResponseCodes.Error,
-                                       error=WebAPI_error(error_code=ErrorCodes.GenericError,
-                                                          error_description='webapi_client_id not presented'),
-                                       response_description='could not execute the command')
-
-            return Response(response.ToJSON(), mimetype='application/json')
-
-        return Response(MakeImageDataHelper(app, webapi_client_id=webapi_client_id), mimetype='application/json')
-
-
-@app.route('/images', methods=['GET'])
-def image():
     try:
-        webapi_client_id = request.args['webapi_client_id']
+        g.db = DatabaseOps(settings[SETTING_TRACKS_DATABASE_FNAME], './logs/errors.log')
     except Exception as ex:
-        print(ex)
-        ReportException('./logs/app.log', ex)
-        response = WebAPI_response(response_code=ResponseCodes.Error,
-                                   error=WebAPI_error(error_code=ErrorCodes.GenericError,
-                                                      error_description='webapi_client_id not presented'),
-                                   response_description='could not execute the command')
-        return Response(response.ToJSON(), mimetype='application/json')
+        ServiceDefs.ReportException('./logs/errors.log', ex)
 
-    if webapi_client_id not in app.clientHelpers.keys():
-        ex = Exception("presented client webapi ID not found in the list of started IDs")
-        ReportException('./logs/app.log', ex)
-        response = WebAPI_response(response_code=ResponseCodes.Error,
-                                   error=WebAPI_error(error_code=ErrorCodes.ClientIDnotFound,
-                                                      error_description='presented client webapi ID not found in the list of started IDs'),
-                                   response_description='unable to get an image for a client without a session')
-        return response
-
-
-
-    command = request.args['command']
-    if command == 'get_next_image':
-        return Response(NextImage(app,
-                                  webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
-                        mimetype='application/json')
-
-    if command == 'get_previous_image':
-        return Response(PreviousImage(app,
-                                      webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
-                        mimetype='application/json')
-
-    elif command == 'get_the_image':
-        try:
-            arg_src_fname = request.args['src_fname']
-        except Exception as ex:
-            print(ex)
-            ReportException('./logs/app.log', ex)
-            response = make_response('source file was not specified')
-            response.headers['ErrorDesc'] = 'FileNotFound'
-            return response
-
-
-
-
-
-
-
-
-# DONE: create route for receiving labeling info from client
-# category=route issue=none estimate=1h
-# This is just the beginning. All the mechanics will be implemented later
-@app.route('/labels', methods=['GET', 'POST'])
-def labels():
-    try:
-        webapi_client_id = request.args['webapi_client_id']
-    except Exception as ex:
-        print(ex)
-        ReportException('./logs/app.log', ex)
-        response = WebAPI_response(response_code=ResponseCodes.Error,
-                                   error=WebAPI_error(error_code=ErrorCodes.GenericError,
-                                                      error_description='webapi_client_id not presented'),
-                                   response_description='could not execute the command')
-        return Response(response.ToJSON(), mimetype='application/json')
-
-    if webapi_client_id not in app.clientHelpers.keys():
-        ex = Exception("presented client webapi ID not found in the list of started IDs")
-        ReportException('./logs/app.log', ex)
-        response = WebAPI_response(response_code=ResponseCodes.Error,
-                                   error=WebAPI_error(error_code=ErrorCodes.ClientIDnotFound,
-                                                      error_description='presented client webapi ID not found in the list of started IDs'),
-                                   response_description='unable to get an image for a client without a session')
-        return Response(response.ToJSON(), mimetype='application/json')
-
-    command = request.args['command']
-    if request.method == 'POST':
-        if command == 'post_current_example_labels':
-            # TODO: implement the command post_current_example_labels of the labels route
-            # category=functionality issue=none estimate=6h
-
-            data_received = request.data
-            print("received data:")
-            print(data_received)
-            response = app.response_class(response="", status=200, mimetype='text/plain')
-            return response
-    elif request.method == 'GET':
-        if command == 'get_current_example_labels':
-            # TODO: implement the c ommand get_current_example_labels of the labels route
-            # category=functionality issue=none estimate=6h
-            # return Response(NextImage(app,
-            #                           webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
-            #                 mimetype='application/json')
-            response = WebAPI_response(response_code=ResponseCodes.Error,
-                                       error=WebAPI_error(error_code = ErrorCodes.NotImplementedError,
-                                                          error_description='sorry, the command ' + command + ' is not implemented at serverside'),
-                                       response_description='could not execute the command')
-            return Response(response.ToJSON(), mimetype='application/json')
-
-
-
-
-
-
-
-
-
-@app.route('/imdone', methods=['GET'])
-def imdone():
-    try:
-        try:
-            webapi_client_id = request.args['webapi_client_id']
-        except Exception as ex:
-            print(ex)
-            ReportException('./logs/app.log', ex)
-            response = make_response('client webapi ID was not specified')
-            response.headers['ErrorDesc'] = 'ClientIDnotSpecified'
-            return response
-
-        del app.bmhelpers[webapi_client_id]
-
-        response = make_response('OK')
-        response.headers['ErrorDesc'] = ''
-        return response
-    except Exception as ex:
-        print(ex)
-        ReportException('./logs/app.log', ex)
-        response = make_response('SetNewLatLonLimits: UnknownError')
-        response.headers['ErrorDesc'] = 'UnknownError'
-        return response
-
-
-app.run(host='0.0.0.0', port=2019)
+    app.run(host='0.0.0.0', port=2019)

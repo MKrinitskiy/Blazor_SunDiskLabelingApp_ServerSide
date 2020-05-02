@@ -10,12 +10,16 @@ from .batches_generator import batches_generator
 # from queue import Queue
 
 
+a = np.random.randn()
+
+
+
 class AllSkyImagesDataAPI(object):
     def __init__(self, src_data_path = './src_data/', shuffle = True):
         self.abs_src_data_path = os.path.join(os.getcwd(), src_data_path)
         self.shuffle = shuffle
 
-        self.fnames = [f for f in find_files(self.abs_src_data_path, "*.jpg")]
+        self.fnames = ServiceDefs.find_files(self.abs_src_data_path, "*.jpg")
         self.indices = np.arange(0, len(self.fnames), 1)
         if shuffle:
             self.shuffle_files()

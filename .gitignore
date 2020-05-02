@@ -131,3 +131,6 @@ cache/*
 tmp/
 
 tdg.log
+/.AppSettings.pkl
+/db/tracks.db
+.DS_Store

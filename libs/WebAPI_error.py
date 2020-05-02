@@ -1,7 +1,7 @@
-from .support_defs import *
+from .ServiceDefs import *
 import json
 
-ErrorCodes = enum(['NoError', 'GenericError', 'UnknownError', 'FileNotFoundError', 'ClientIDnotFound', 'NotImplementedError'])
+ErrorCodes = ServiceDefs.enum(['NoError', 'GenericError', 'UnknownError', 'FileNotFoundError', 'ClientIDnotFound', 'NotImplementedError'])
 
 class WebAPI_error(object):
     def __init__(self, error_code = ErrorCodes.NoError, error_description = ""):

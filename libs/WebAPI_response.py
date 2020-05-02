@@ -1,11 +1,11 @@
-from .support_defs import *
+from .ServiceDefs import *
 from .WebAPI_error import *
 import json
 import numpy as np
 import numbers
 from flask import request, make_response, Response
 
-ResponseCodes = enum(['OK', 'Error'])
+ResponseCodes = ServiceDefs.enum(['OK', 'Error'])
 
 class WebAPI_response(Response):
     def __init__(self, response_code = ResponseCodes.OK, error = WebAPI_error(), response_description = ""):
@@ -16,4 +16,4 @@ class WebAPI_response(Response):
         super(WebAPI_response, self).__init__()
 
     def ToJSON(self):
-        return json.dumps(self, default=object_convertion_rules)
+        return json.dumps(self, default=ServiceDefs.object_convertion_rules)
