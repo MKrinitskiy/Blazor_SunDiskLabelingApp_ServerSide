@@ -21,7 +21,6 @@ if __name__ == "__main__":
     app = FlaskExtended(__name__, static_folder='cache')
     CORS(app)
     app.config['SECRET_KEY'] = binascii.hexlify(os.urandom(24))
-    # file_handler = logging.FileHandler('./logs/app.log')
 
     tmp_imag_dir = os.path.join(os.getcwd(), 'tmp')
     src_data_dir = os.path.join(os.getcwd(), 'src_data')
@@ -34,7 +33,7 @@ if __name__ == "__main__":
 
     try:
         with app.app_context():
-            g.db = DatabaseOps(settings[SETTING_TRACKS_DATABASE_FNAME], './logs/errors.log')
+            app.db = DatabaseOps(settings[SETTING_TRACKS_DATABASE_FNAME], './logs/errors.log')
     except Exception as ex:
         ServiceDefs.ReportException('./logs/errors.log', ex)
 

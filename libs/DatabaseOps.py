@@ -11,8 +11,12 @@ class DatabaseOps():
     def __init__(self, db_fname, errors_fname):
         self.db_fname = db_fname
         self.errors_fname = errors_fname
-        assert self.test_db_connection(), 'database connection failed. could not proceed\ndb_fname=%s' % self.db_fname
-
+        if not self.test_db_connection():
+            try:
+                DatabaseOps.create_tracks_db(self.db_fname, self.errors_fname)
+            except Exception as ex:
+                ServiceDefs.ReportException(self.errors_fname, ex)
+                raise ex
 
     def test_db_connection(self):
         try:
