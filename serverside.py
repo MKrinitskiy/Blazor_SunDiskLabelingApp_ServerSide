@@ -33,7 +33,8 @@ if __name__ == "__main__":
     app.add_url_rule(rule='/imdone', endpoint='url_rule_imdone', view_func=lambda: url_rule_imdone(app), methods=['GET'])
 
     try:
-        g.db = DatabaseOps(settings[SETTING_TRACKS_DATABASE_FNAME], './logs/errors.log')
+        with app.app_context():
+            g.db = DatabaseOps(settings[SETTING_TRACKS_DATABASE_FNAME], './logs/errors.log')
     except Exception as ex:
         ServiceDefs.ReportException('./logs/errors.log', ex)
 

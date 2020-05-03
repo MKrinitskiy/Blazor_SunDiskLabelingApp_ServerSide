@@ -17,6 +17,7 @@ class ServiceDefs():
         else:
             return False
 
+
     @classmethod
     def DoesPathExistAndIsFile(cls, pathStr):
         if os.path.exists(pathStr) and os.path.isfile(pathStr):
@@ -24,13 +25,14 @@ class ServiceDefs():
         else:
             return False
 
+
     @classmethod
     def EnsureDirectoryExists(cls, pathStr):
         if not ServiceDefs.DoesPathExistAndIsDirectory(pathStr):
             try:
                 pathlib.Path(pathStr).mkdir(parents=True, exist_ok=True)
             except Exception as ex:
-                err_fname = './errors.log'
+                err_fname = './logs/errors.log'
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 with open(err_fname, 'a') as errf:
                     traceback.print_tb(exc_traceback, limit=None, file=errf)
@@ -98,6 +100,40 @@ class ServiceDefs():
                     errf.write('%s' % kwargs[k])
                     errf.write('\n')
             errf.write('\n\n\n')
+
+
+    @classmethod
+    def Log(cls, log_fname, **kwargs):
+        with open(log_fname, 'a') as logf:
+            logf.write('================ ' + str(datetime.datetime.now()) + ' ================\n')
+            if len(kwargs) > 0:
+                logf.write('\n')
+                for k in kwargs.keys():
+                    logf.write('......%s......\n' % k)
+                    logf.write('%s' % kwargs[k])
+                    logf.write('\n')
+            logf.write('\n\n\n')
+
+
+    @classmethod
+    def LogRequest(cls, log_fname, request):
+        with open(log_fname, 'a') as logf:
+            logf.write('================ ' + str(datetime.datetime.now()) + ' ================\n')
+            for k in ['date', 'method', 'scheme', 'path', 'full_path', 'script_root', 'url', 'base_url',
+                      'url_root', 'content_encoding', 'content_type', 'mimetype', 'content_length']:
+                logf.write('{:<20}   {:<}\n'.format(k, str(getattr(request, k, '---'))))
+
+            logf.write('\nargs: \n')
+            for k in request.args.keys():
+                logf.write('{:<20}   {:<}\n'.format(k, request.args[k]))
+                # logf.write('%s: ' % k)
+                # logf.write('%s\n' % request.args[k])
+
+            if 'text/plain' in request.mimetype:
+                logf.write('\ndata: \n')
+                logf.write(request.data.decode('utf-8'))
+
+            logf.write('\n\n')
 
 
 

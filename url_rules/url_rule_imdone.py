@@ -2,16 +2,18 @@ from flask import request, make_response, Response
 from libs.ServiceDefs import ServiceDefs
 from libs.WebAPI_response import *
 from libs.ServersideHandlers import ServersideHandlers
+from flask import g
 
 
 def url_rule_imdone(app):
     with app.app_context():
+        ServiceDefs.LogRequest('./logs/app.log', request)
         try:
             try:
                 webapi_client_id = request.args['webapi_client_id']
             except Exception as ex:
                 print(ex)
-                ServiceDefs.ReportException('./logs/app.log', ex)
+                ServiceDefs.ReportException('./logs/errors.log', ex)
                 response = make_response('client webapi ID was not specified')
                 response.headers['ErrorDesc'] = 'ClientIDnotSpecified'
                 return response
@@ -23,7 +25,7 @@ def url_rule_imdone(app):
             return response
         except Exception as ex:
             print(ex)
-            ServiceDefs.ReportException('./logs/app.log', ex)
+            ServiceDefs.ReportException('./logs/errors.log', ex)
             response = make_response('SetNewLatLonLimits: UnknownError')
             response.headers['ErrorDesc'] = 'UnknownError'
             return response

@@ -6,13 +6,14 @@ from libs.ServersideHandlers import ServersideHandlers
 
 def url_rule_exec(app):
     with app.app_context():
+        ServiceDefs.LogRequest('./logs/app.log', request)
         command = request.args['command']
         if command == 'start':
             try:
                 webapi_client_id = request.args['webapi_client_id']
             except Exception as ex:
                 print(ex)
-                ServiceDefs.ReportException('./logs/app.log', ex)
+                ServiceDefs.ReportException('./logs/errors.log', ex)
                 response = WebAPI_response(response_code=ResponseCodes.Error,
                                            error=WebAPI_error(error_code=ErrorCodes.GenericError,
                                                               error_description='webapi_client_id not presented'),

@@ -2,15 +2,17 @@ from flask import request, make_response, Response
 from libs.ServiceDefs import ServiceDefs
 from libs.WebAPI_response import *
 from libs.ServersideHandlers import ServersideHandlers
+from flask import g
 
 
 def url_rule_image(app):
     with app.app_context():
+        ServiceDefs.LogRequest('./logs/app.log', request)
         try:
             webapi_client_id = request.args['webapi_client_id']
         except Exception as ex:
             print(ex)
-            ServiceDefs.ReportException('./logs/app.log', ex)
+            ServiceDefs.ReportException('./logs/errors.log', ex)
             response = WebAPI_response(response_code=ResponseCodes.Error,
                                        error=WebAPI_error(error_code=ErrorCodes.GenericError,
                                                           error_description='webapi_client_id not presented'),
@@ -19,7 +21,7 @@ def url_rule_image(app):
 
         if webapi_client_id not in app.clientHelpers.keys():
             ex = Exception("presented client webapi ID not found in the list of started IDs")
-            ServiceDefs.ReportException('./logs/app.log', ex)
+            ServiceDefs.ReportException('./logs/errors.log', ex)
             response = WebAPI_response(response_code=ResponseCodes.Error,
                                        error=WebAPI_error(error_code=ErrorCodes.ClientIDnotFound,
                                                           error_description='presented client webapi ID not found in the list of started IDs'),
@@ -44,7 +46,7 @@ def url_rule_image(app):
                 arg_src_fname = request.args['src_fname']
             except Exception as ex:
                 print(ex)
-                ServiceDefs.ReportException('./logs/app.log', ex)
+                ServiceDefs.ReportException('./logs/errors.log', ex)
                 response = make_response('source file was not specified')
                 response.headers['ErrorDesc'] = 'FileNotFound'
                 return response
