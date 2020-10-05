@@ -3,6 +3,7 @@ from libs.ServiceDefs import ServiceDefs
 from libs.WebAPI_response import *
 from libs.ServersideHandlers import ServersideHandlers
 from flask import g
+from libs.interfaces import *
 
 
 
@@ -32,12 +33,15 @@ def url_rule_labels(app):
         command = request.args['command']
         if request.method == 'POST':
             if command == 'post_current_example_labels':
-                # TODO: implement the command post_current_example_labels of the labels route
-                # category=functionality issue=none estimate=6h
-
                 data_received = request.data
-                print("received data:")
-                print(data_received.decode('utf-8'))
+                # print("received data:")
+                # print(data_received.decode('utf-8'))
+                jsontext = ''.join([l.replace('\n', '').strip() for l in data_received.decode('utf-8')])
+                data_dict = json.loads(jsontext)
+                decoded_labels = ExampleLabels.from_json(data_dict)
+
+                app.db.insert_example_labels(data_dict)
+
                 response = app.response_class(response="", status=200, mimetype='text/plain')
                 return response
         elif request.method == 'GET':
@@ -49,6 +53,6 @@ def url_rule_labels(app):
                 #                 mimetype='application/json')
                 response = WebAPI_response(response_code=ResponseCodes.Error,
                                            error=WebAPI_error(error_code = ErrorCodes.NotImplementedError,
-                                                              error_description='sorry, the command ' + command + ' is not implemented at serverside'),
+                                                              error_description='sorry, the command ' + command + ' is not implemented at serverside yet'),
                                            response_description='could not execute the command')
                 return Response(response.ToJSON(), mimetype='application/json')

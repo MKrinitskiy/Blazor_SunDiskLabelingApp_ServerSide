@@ -1,7 +1,8 @@
-from serverside_APIs import *
+from serverside_APIs import AllSkyImagesDataAPI
 from . import *
 import binascii, cv2
 from flask import g
+import os
 
 
 
@@ -29,7 +30,7 @@ class ServersideHandlers():
             clientHelper = app.clientHelpers[webapi_client_id]
             tmp_base_fname = 'plot-%s.jpg' % binascii.hexlify(os.urandom(5)).decode('ascii')
             tmp_fname = os.path.join(cache_abs_path, tmp_base_fname)
-            clientHelper.read_next_image(tmp_image_fname=tmp_fname)
+            img_basename = clientHelper.read_next_image(tmp_image_fname=tmp_fname)
 
             img_uri = ServiceDefs.urljoin('cache', tmp_base_fname)
 
@@ -38,9 +39,11 @@ class ServersideHandlers():
                                        response_description="new image sucessfully prepared")
             response.StringAttributes['imageURL'] = img_uri
 
-            response.StringAttributes['SunDisk_RoundDataWithUnderlyingImgSize'] = ServiceDefs.ToJSON(RoundDataWithUnderlyingImgSize(RoundData(512,512,100),
-                                                                                                                                    Size(1920, 1920)))
-            response.StringAttributes['ImgSize_'] = ServiceDefs.ToJSON(Size(1920, 1920))
+            response.StringAttributes['imgBaseName'] = img_basename
+
+            # response.StringAttributes['SunDisk_RoundDataWithUnderlyingImgSize'] = ServiceDefs.ToJSON(RoundDataWithUnderlyingImgSize(RoundData(512,512,100), Size(1920, 1920)))
+
+            # response.StringAttributes['ImgSize_'] = ServiceDefs.ToJSON(Size(1920, 1920))
 
             print("sending JSON response:")
             print('JSON: ' + response.ToJSON())

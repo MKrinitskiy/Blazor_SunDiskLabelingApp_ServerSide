@@ -2,8 +2,6 @@ from .FlaskExtended import *
 from .ServiceDefs import *
 from .WebAPI_response import *
 from .WebAPI_error import *
-from .DataStructures_Geometry import *
-from .DataStructures_RoundData import *
 from .ServersideHandlers import *
 from .DatabaseOps import *
 from .Settings import *

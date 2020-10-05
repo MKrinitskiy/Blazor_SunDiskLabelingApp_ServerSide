@@ -1,28 +1,25 @@
 
-CREATE_TRACKS_TABLE_QUERY_TEXT = '''CREATE TABLE tracks (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, ''' + \
-                                 '''                     start_dt TEXT, ''' + \
-                                 '''                     end_dt TEXT, ''' + \
-                                 '''                     track_uid TEXT NOT NULL UNIQUE, ''' + \
-                                 '''                     human_readable_name TEXT NOT NULL)'''
+CREATE_EXAAMPLES_TABLE_QUERY_TEXT = '''CREATE TABLE "examples" ''' + \
+                                    '''             ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, ''' + \
+	                                '''             "img_basename"	TEXT NOT NULL UNIQUE)'''
 
 
-CREATE_LABELS_TABLE_QUERY_TEXT = '''CREATE TABLE labels (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, ''' + \
-                                 '''               label_uid TEXT NOT NULL UNIQUE, ''' + \
-                                 '''               dt TEXT NOT NULL, ''' + \
-                                 '''               sourcedata_fname TEXT NOT NULL)'''
+CREATE_LABELS_TABLE_QUERY_TEXT = '''CREATE TABLE "labels" ("id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, ''' + \
+                                 '''                       "example_id"	INTEGER NOT NULL, ''' + \
+                                 '''                       "ObjectType"	INTEGER, ''' + \
+                                 '''                       "position_x"	REAL NOT NULL, ''' + \
+                                 '''                       "position_y"	REAL NOT NULL, ''' + \
+                                 '''                       "end_x"	REAL NOT NULL, ''' + \
+                                 '''                       "end_y"	REAL NOT NULL, ''' + \
+                                 '''                       "img_width"	REAL NOT NULL, ''' + \
+                                 '''                       "img_height"	REAL NOT NULL)'''
 
-
-
-CREATE_TRACK_LABELS_QUERY_TEXT = '''CREATE TABLE track_labels (label_id INTEGER NOT NULL, ''' + \
-                                 '''                           track_id INTEGER NOT NULL)'''
-
-
-INSERT_TRACK_QUERY_TEXT = '''INSERT OR IGNORE INTO tracks (track_uid, human_readable_name) ''' + \
-                          '''                      VALUES ("%s", "%s")'''
+INSERT_EXAAMPLE_QUERY_TEXT = '''INSERT OR IGNORE INTO examples (id, img_basename) ''' + \
+                             '''                      VALUES ("%s", "%s")'''
 
 
 
-INSERT_LABEL_QUERY_TEXT = '''INSERT OR IGNORE INTO labels (label_uid, dt, name, lon0, lat0, lon1, lat1, lon2, lat2, sourcedata_fname) ''' + \
+INSERT_LABEL_QUERY_TEXT = '''INSERT OR IGNORE INTO labels (dt, name, lon0, lat0, lon1, lat1, lon2, lat2, sourcedata_fname) ''' + \
                           '''                      VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")'''
 
 
@@ -86,13 +83,12 @@ SELECT_TRACKS_BY_DATETIME_RANGE_QUERY_TEXT = '''SELECT tr.track_uid, tr.human_re
 SELECT_LABELS_BY_SOURCEDATA_BASENAME = '''SELECT * FROM labels WHERE labels.sourcedata_fname = "%s"'''
 
 
-REMOVE_LABEL_QUERY_TEXTS = ['''DELETE FROM track_labels WHERE track_labels.label_id IN (SELECT id FROM labels WHERE labels.label_uid = "%s")''',
-                            '''DELETE FROM labels WHERE labels.label_uid = "%s"''']
-
+REMOVE_LABEL_QUERY_TEXTS = \
+        ['''DELETE FROM track_labels WHERE track_labels.label_id IN (SELECT id FROM labels WHERE labels.label_uid = "%s")''',
+        '''DELETE FROM labels WHERE labels.label_uid = "%s"''']
 
 UPDATE_LABEL_DATA_QUERY_TEXT = '''UPDATE labels SET dt="%s", name="%s", lon0="%s", lat0="%s", lon1="%s", lat1="%s", lon2="%s", lat2="%s" ''' + \
                                '''  WHERE label_uid = "%s"'''
-
 
 DATETIME_FORMAT_STRING = '%Y-%m-%dT%H:%M:%S'
 DATETIME_HUMAN_READABLE_FORMAT_STRING = '%Y-%m-%d %H:%M:%S'

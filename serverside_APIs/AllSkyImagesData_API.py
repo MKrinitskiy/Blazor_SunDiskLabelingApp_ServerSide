@@ -42,6 +42,7 @@ class AllSkyImagesDataAPI(object):
     def read_next_image(self, tmp_image_fname):
         img_fname_idx = next(self.indices_batch_generator)[0]
         img_fname = self.fnames[img_fname_idx]
+        img_basename = os.path.basename(img_fname)
 
         image = cv2.imread(img_fname)
 
@@ -53,3 +54,4 @@ class AllSkyImagesDataAPI(object):
 
         cv2.imwrite(tmp_image_fname, self.currentImageBinary)
         self.generated_examples_history.append(tmp_image_fname)
+        return img_basename
