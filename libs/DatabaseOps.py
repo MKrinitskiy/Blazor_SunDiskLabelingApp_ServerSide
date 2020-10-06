@@ -16,11 +16,14 @@ class DatabaseOps():
     def __init__(self, db_conection_dict, errors_fname):
         self.db_conection_dict = db_conection_dict
         self.errors_fname = errors_fname
-        self.client = self.client = MongoClient(host = self.db_conection_dict[SETTING_LABELS_DATABASE_HOST],
-                                                port = int(self.db_conection_dict[SETTING_LABELS_DATABASE_PORT]),
-                                                serverSelectionTimeoutMS = 2000)
-        self.db = self.client[self.db_conection_dict[SETTING_LABELS_DATABASE_NAME]]
-        self.collection = self.db[self.db_conection_dict[SETTING_LABELS_COLLECTION]]
+        # self.client = self.client = MongoClient(host = self.db_conection_dict[SETTING_LABELS_DATABASE_HOST],
+        #                                         port = int(self.db_conection_dict[SETTING_LABELS_DATABASE_PORT]),
+        #                                         serverSelectionTimeoutMS = 2000)
+        self.client = MongoClient(
+            'mongodb://' + db_conection_dict['db_username'] + ':' + db_conection_dict['db_password'] + '@' +
+            db_conection_dict['db_host'] + ':27017/' + db_conection_dict['db_name'], serverSelectionTimeoutMS=2000)
+        self.db = self.client[db_conection_dict[SETTING_LABELS_DATABASE_NAME]]
+        self.collection = self.db[db_conection_dict[SETTING_LABELS_COLLECTION]]
 
 
     def test_db_connection(self):
@@ -36,7 +39,8 @@ class DatabaseOps():
         try:
             found = self.collection.find_one({"strBaseImageFilename": img_basename})
             if found:
-                return ExampleLabels.from_json(json.loads(found))
+                del found['_id']
+                return json.dumps(found)
             else:
                 return None
         except Exception as ex:

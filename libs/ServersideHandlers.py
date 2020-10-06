@@ -1,5 +1,6 @@
 from serverside_APIs import AllSkyImagesDataAPI
-from . import *
+from .ServiceDefs import *
+from .WebAPI_response import *
 import binascii, cv2
 from flask import g
 import os
@@ -79,10 +80,6 @@ class ServersideHandlers():
                                        error=WebAPI_error(),
                                        response_description="previous image sucessfully found")
             response.StringAttributes['imageURL'] = img_uri
-
-            response.StringAttributes['SunDisk_RoundDataWithUnderlyingImgSize'] = ServiceDefs.ToJSON(RoundDataWithUnderlyingImgSize(RoundData(512, 512, 100),
-                                                                                                                                    Size(1920, 1920)))
-            response.StringAttributes['ImgSize_'] = ServiceDefs.ToJSON(Size(1920, 1920))
 
             print("sending JSON response:")
             print('JSON: ' + response.ToJSON())

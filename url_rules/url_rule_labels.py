@@ -40,19 +40,38 @@ def url_rule_labels(app):
                 data_dict = json.loads(jsontext)
                 decoded_labels = ExampleLabels.from_json(data_dict)
 
-                app.db.insert_example_labels(data_dict)
+                if not app.disable_mongodb:
+                    app.db.insert_example_labels(data_dict)
 
                 response = app.response_class(response="", status=200, mimetype='text/plain')
                 return response
         elif request.method == 'GET':
             if command == 'get_current_example_labels':
-                # TODO: implement the command get_current_example_labels of the labels route
-                # category=functionality issue=none estimate=6h
-                # return Response(NextImage(app,
-                #                           webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')),
-                #                 mimetype='application/json')
-                response = WebAPI_response(response_code=ResponseCodes.Error,
-                                           error=WebAPI_error(error_code = ErrorCodes.NotImplementedError,
-                                                              error_description='sorry, the command ' + command + ' is not implemented at serverside yet'),
-                                           response_description='could not execute the command')
-                return Response(response.ToJSON(), mimetype='application/json')
+                if not app.disable_mongodb:
+                    img_basename = request.args['img_basename']
+                    found_example_labels = app.db.read_example_labels(img_basename)
+                    if found_example_labels is None:
+                        response = WebAPI_response(response_code=ResponseCodes.OK,
+                                                   error=WebAPI_error(error_code = ErrorCodes.NoError,
+                                                                      error_description=''),
+                                                   response_description='there are still no labels for this image')
+                        # response = WebAPI_response(response_code=ResponseCodes.Error,
+                        #                            error=WebAPI_error(error_code = ErrorCodes.NotImplementedError,
+                        #                                               error_description='sorry, the command ' + command + ' is not implemented at serverside yet'),
+                        #                            response_description='could not execute the command')
+                    else:
+                        response = WebAPI_response(response_code=ResponseCodes.OK,
+                                                   error=WebAPI_error(),
+                                                   response_description="found labels created previously")
+                        response.StringAttributes['found_example_labels'] = found_example_labels
+
+                        print("sending JSON response:")
+                        print('JSON: ' + response.ToJSON())
+
+                    return Response(response.ToJSON(), mimetype='application/json')
+                else:
+                    response = WebAPI_response(response_code=ResponseCodes.OK,
+                                               error=WebAPI_error(error_code = ErrorCodes.NoError,
+                                                                  error_description='database connection is turned off so there is no way to get the previous labels'),
+                                               response_description='database connection is turned off so there is no way to get the previous labels')
+                    return Response(response.ToJSON(), mimetype='application/json')

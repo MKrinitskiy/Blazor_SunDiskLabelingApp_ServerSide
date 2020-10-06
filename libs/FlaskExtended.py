@@ -8,3 +8,4 @@ from flask import g
 class FlaskExtended(Flask):
     clientHelpers = dict()
     db = None
+    disable_mongodb = False
