@@ -25,13 +25,12 @@ class ServersideHandlers():
 
     @classmethod
     def NextImage(cls, app, webapi_client_id, cache_abs_path):
-        # DONE: store the images IDs for the PreviousImage() to work properly
-        # category=general functionality issue=none estimate=2h
         with app.app_context():
             clientHelper = app.clientHelpers[webapi_client_id]
+            ServiceDefs.EnsureDirectoryExists(cache_abs_path)
             tmp_base_fname = 'plot-%s.jpg' % binascii.hexlify(os.urandom(5)).decode('ascii')
             tmp_fname = os.path.join(cache_abs_path, tmp_base_fname)
-            img_basename = clientHelper.read_next_image(tmp_image_fname=tmp_fname)
+            example = clientHelper.read_next_image(tmp_image_fname=tmp_fname)
 
             img_uri = ServiceDefs.urljoin('cache', tmp_base_fname)
 
@@ -40,11 +39,33 @@ class ServersideHandlers():
                                        response_description="new image sucessfully prepared")
             response.StringAttributes['imageURL'] = img_uri
 
-            response.StringAttributes['imgBaseName'] = img_basename
+            response.StringAttributes['imgBaseName'] = example.img_basename
 
-            # response.StringAttributes['SunDisk_RoundDataWithUnderlyingImgSize'] = ServiceDefs.ToJSON(RoundDataWithUnderlyingImgSize(RoundData(512,512,100), Size(1920, 1920)))
+            print("sending JSON response:")
+            print('JSON: ' + response.ToJSON())
+            return response.ToJSON()
 
-            # response.StringAttributes['ImgSize_'] = ServiceDefs.ToJSON(Size(1920, 1920))
+
+    @classmethod
+    def SpecificImage(cls, app, webapi_client_id, cache_abs_path, **kwargs):
+        assert 'specific_image_basename' in kwargs.keys()
+        specific_image_basename = kwargs['specific_image_basename']
+
+        with app.app_context():
+            clientHelper = app.clientHelpers[webapi_client_id]
+            ServiceDefs.EnsureDirectoryExists(cache_abs_path)
+            tmp_base_fname = 'plot-%s.jpg' % binascii.hexlify(os.urandom(5)).decode('ascii')
+            tmp_fname = os.path.join(cache_abs_path, tmp_base_fname)
+            example = clientHelper.read_sprcific_image(img_basename = specific_image_basename, tmp_image_fname=tmp_fname)
+
+            img_uri = ServiceDefs.urljoin('cache', tmp_base_fname)
+
+            response = WebAPI_response(response_code=ResponseCodes.OK,
+                                       error=WebAPI_error(),
+                                       response_description="new image sucessfully prepared")
+            response.StringAttributes['imageURL'] = img_uri
+
+            response.StringAttributes['imgBaseName'] = example.img_basename
 
             print("sending JSON response:")
             print('JSON: ' + response.ToJSON())
@@ -61,17 +82,22 @@ class ServersideHandlers():
             print('entered PreviousImage()')
 
             clientHelper = app.clientHelpers[webapi_client_id]
+            ServiceDefs.EnsureDirectoryExists(cache_abs_path)
             print('got clientHelper for the client %s' % webapi_client_id)
 
-            # DONE: fix PreviousImage
-            # category=handlers issue=none estimate=1h
-            # PreviousImage works wrong. It returns the last example which is actually current
+            print('=======getting previous example======')
+            print([t.img_basename for t in clientHelper.generated_examples_history])
+            if len(clientHelper.generated_examples_history) >= 2:
+                _ = clientHelper.generated_examples_history.pop()
+                example = clientHelper.generated_examples_history[-1]
+            else:
+                tmp_base_fname = 'plot-%s.jpg' % binascii.hexlify(os.urandom(5)).decode('ascii')
+                tmp_fname = os.path.join(cache_abs_path, tmp_base_fname)
+                example = clientHelper.read_next_image(tmp_image_fname=tmp_fname)
+            print('got example: %s' % example.img_basename)
 
-            tmp_fname = clientHelper.generated_examples_history.pop()
-            tmp_fname = clientHelper.generated_examples_history.pop()
-            print('tmp_fname = %s' % tmp_fname)
 
-            tmp_base_fname = os.path.basename(tmp_fname)
+            tmp_base_fname = os.path.basename(example.cached_file_name)
             print('tmp_base_fname = %s' % tmp_base_fname)
 
             img_uri = ServiceDefs.urljoin('cache', tmp_base_fname)
@@ -80,6 +106,7 @@ class ServersideHandlers():
                                        error=WebAPI_error(),
                                        response_description="previous image sucessfully found")
             response.StringAttributes['imageURL'] = img_uri
+            response.StringAttributes['imgBaseName'] = example.img_basename
 
             print("sending JSON response:")
             print('JSON: ' + response.ToJSON())

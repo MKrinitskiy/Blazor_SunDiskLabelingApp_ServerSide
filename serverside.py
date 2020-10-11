@@ -72,12 +72,12 @@ if __name__ == "__main__":
 
     tmp_imag_dir = os.path.join(os.getcwd(), 'tmp')
     src_data_dir = os.path.join(os.getcwd(), 'src_data')
-
-    app.add_url_rule(rule='/', endpoint='url_rule_root', view_func=lambda: url_rule_root(app), methods=['GET'])
-    app.add_url_rule(rule='/exec', endpoint='url_rule_exec', view_func=lambda: url_rule_exec(app), methods=['GET'])
-    app.add_url_rule(rule='/images', endpoint='url_rule_image', view_func=lambda: url_rule_image(app), methods=['GET'])
-    app.add_url_rule(rule='/labels', endpoint='url_rule_labels', view_func=lambda: url_rule_labels(app), methods=['GET', 'POST'])
-    app.add_url_rule(rule='/imdone', endpoint='url_rule_imdone', view_func=lambda: url_rule_imdone(app), methods=['GET'])
+    
+    app.add_url_rule(rule='/app/', endpoint='url_rule_root', view_func=lambda: url_rule_root(app), methods=['GET'])
+    app.add_url_rule(rule='/app/exec', endpoint='url_rule_exec', view_func=lambda: url_rule_exec(app), methods=['GET'])
+    app.add_url_rule(rule='/app/images', endpoint='url_rule_image', view_func=lambda: url_rule_image(app), methods=['GET'])
+    app.add_url_rule(rule='/app/labels', endpoint='url_rule_labels', view_func=lambda: url_rule_labels(app), methods=['GET', 'POST'])
+    app.add_url_rule(rule='/app/imdone', endpoint='url_rule_imdone', view_func=lambda: url_rule_imdone(app), methods=['GET'])
 
     app.run(host='0.0.0.0', port=args.port)
     

@@ -6,7 +6,7 @@ from flask import g
 from pymongo import MongoClient
 from .constants import *
 import json
-from libs.interfaces.ExampleLabels import *
+# from libs.interfaces.ExampleLabels import *
 
 
 
@@ -40,7 +40,8 @@ class DatabaseOps():
             found = self.collection.find_one({"strBaseImageFilename": img_basename})
             if found:
                 del found['_id']
-                return json.dumps(found)
+                found_str = json.dumps(found).replace(JSON_TYPE_KEY, '$type').replace(JSON_VALUE_KEY, '$values')
+                return found_str
             else:
                 return None
         except Exception as ex:
@@ -50,6 +51,7 @@ class DatabaseOps():
 
     def insert_example_labels(self, example_labels):
         try:
+            self.collection.delete_many({"strBaseImageFilename": example_labels['strBaseImageFilename']})
             example_id = self.collection.insert_one(example_labels).inserted_id
             return example_id
         except Exception as ex:

@@ -4,6 +4,7 @@ from libs.WebAPI_response import *
 from libs.ServersideHandlers import ServersideHandlers
 from flask import g
 from libs.interfaces import *
+from libs.constants import JSON_TYPE_KEY, JSON_VALUE_KEY
 
 
 
@@ -37,8 +38,12 @@ def url_rule_labels(app):
                 # print("received data:")
                 # print(data_received.decode('utf-8'))
                 jsontext = ''.join([l.replace('\n', '').strip() for l in data_received.decode('utf-8')])
+                jsontext = jsontext.replace("$type", JSON_TYPE_KEY).replace("$values", JSON_VALUE_KEY)
                 data_dict = json.loads(jsontext)
-                decoded_labels = ExampleLabels.from_json(data_dict)
+
+                ServiceDefs.Log('./logs/app.log', jsontext=jsontext, data_dict=data_dict)
+
+                # decoded_labels = ExampleLabels.from_json(data_dict)
 
                 if not app.disable_mongodb:
                     app.db.insert_example_labels(data_dict)

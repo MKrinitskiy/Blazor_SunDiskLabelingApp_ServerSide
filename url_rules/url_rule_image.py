@@ -32,10 +32,17 @@ def url_rule_image(app):
 
         command = request.args['command']
         if command == 'get_next_image':
-            return Response(ServersideHandlers.NextImage(app, webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')), mimetype='application/json')
+            return Response(ServersideHandlers.NextImage(app, webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('../BlazorClientSide/cache/')), mimetype='application/json')
 
         if command == 'get_previous_image':
-            return Response(ServersideHandlers.PreviousImage(app, webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./cache/')), mimetype='application/json')
+            return Response(ServersideHandlers.PreviousImage(app, webapi_client_id=webapi_client_id, cache_abs_path=os.path.abspath('./BlazorClientSide/cache/')), mimetype='application/json')
+
+        if command == 'get_specific_image':
+            return Response(ServersideHandlers.SpecificImage(app,
+                                                             webapi_client_id = webapi_client_id,
+                                                             cache_abs_path = os.path.abspath('../BlazorClientSide/cache/'),
+                                                             specific_image_basename = request.args['imgBaseName']),
+                            mimetype='application/json')
 
         elif command == 'get_the_image':
             try:
